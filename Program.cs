@@ -21,12 +21,29 @@ namespace python_env
 
             string token = GetToken();
 
+            JsonObject data_in = PollDataIn();
+
+            WriteResource(productID, "data_in", data_in.ToString());
+        }
+
+        //  NEEDS TO BE MODIFIED BY CUSTOMER!
+        //  Return a JsonObject that contains the sensor data for data_in
+        //
+        //    For more info on resources (data_in), see the industrial IoT Schema: https://github.com/exosite/industrial_iot_schema/blob/master/channel-signal_io_schema.md
+        //    More documentation is also available here: https://exosense.readme.io/docs/device-interface-overview
+        public static JsonObject PollDataIn()
+        {
             JsonObject data_in = new JsonObject();
             Random rand = new Random();
             int rand_value = rand.Next(1,100);
+            ////////////////////////////////////////////
+            ////
+            /// Populate data_in with sensor data here!
+            ///
+            ///////////////////////////////////////////
             data_in.Add("rand_val", rand_value);
 
-            WriteResource(productID, "data_in", data_in.ToString());
+            return data_in;
         }
 
         // Sends a POST request to provision the device
