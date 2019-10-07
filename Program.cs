@@ -95,6 +95,11 @@ namespace python_env
         {
             string CurrentDirectory = Directory.GetCurrentDirectory();
             string productIDFile = CurrentDirectory + Path.DirectorySeparatorChar + "product_id.txt";
+            
+            if (!File.Exists(productIDFile))
+            {
+                throw new System.InvalidOperationException("Need to have product_id.txt with the productID in the contents!");
+            }
 
             string productId =  System.IO.File.ReadAllText(productIDFile);
             // Remove Whitespaces and newlines that may accidentally be in the file
