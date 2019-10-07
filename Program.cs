@@ -29,6 +29,9 @@ namespace python_env
             WriteResource(productID, "data_in", data_in.ToString());
         }
 
+        // Sends a POST request to provision the device
+        //     If the device is provisioned successfully, a token is returned
+        //     We save that token to token.txt for future use
         private static void provision(string productID, string deviceID)
         {
             string url = "https://" + productID+ ".m2.exosite.io/";
@@ -43,14 +46,14 @@ namespace python_env
             request.Method = "POST";
             request.ProtocolVersion = HttpVersion.Version11;
 
-    /// Body
+            /// Body
             string body = "id="+deviceID;
             ASCIIEncoding encoding = new ASCIIEncoding();
             byte[] payloadBytes = encoding.GetBytes(body);
             request.ContentLength = payloadBytes.Length;
             Stream newStream = request.GetRequestStream ();
             newStream.Write (payloadBytes, 0, payloadBytes.Length);
-    /// End Body
+            /// End Body
 
             try
             {
@@ -58,7 +61,7 @@ namespace python_env
                 Stream resStream = response.GetResponseStream();
                 StreamReader reader = new StreamReader(resStream);
                 string MSG = reader.ReadLine();
-                writeToFile(GetTokenFile(),MSG);
+                File.WriteAllText(GetTokenFile(),MSG);
             }
             catch(Exception e)
             {
@@ -67,18 +70,7 @@ namespace python_env
 
         }
 
-        private static void writeToFile(string file, string body)
-        {
-            try
-            {
-                File.WriteAllText(file, body);
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine("{0} Exception caught.", e);
-            }
-        }
-
+        // Gets the full filepath/name of the token.txt file
         private static string GetTokenFile()
         {
             string CurrentDirectory = Directory.GetCurrentDirectory();
@@ -86,11 +78,14 @@ namespace python_env
             return tokenFile;
         }
         
+        // Reads the contents of token.txt which contains the authentication token
         private static string GetToken()
         {
             return System.IO.File.ReadAllText(GetTokenFile());
         }
 
+        // Gets the productID from product_id.txt
+        //    Can be changed/overriden if needed
         private static string GetProductID()
         {
             string CurrentDirectory = Directory.GetCurrentDirectory();
@@ -107,6 +102,10 @@ namespace python_env
             return productId;
         }
 
+        // Writes a value to a resource in Murano
+        //    The most common resources to write to are config_io and data_in
+        //    For more info on resources, see the industrial IoT Schema: https://github.com/exosite/industrial_iot_schema/blob/master/channel-signal_io_schema.md
+        //    More documentation is also available here: https://exosense.readme.io/docs/device-interface-overview
         private static void WriteResource(string productID, string resource, string resource_value)
         {
             Console.WriteLine("Writing Data...");
@@ -124,14 +123,14 @@ namespace python_env
             request.Headers["X-Exosite-CIK"] = token;
             request.ProtocolVersion = HttpVersion.Version11;
 
-    /// Body
+            /// Body
             string body = resource + "=" + resource_value;;
             ASCIIEncoding encoding = new ASCIIEncoding();
             byte[] payloadBytes = encoding.GetBytes(body);
             request.ContentLength = payloadBytes.Length;
             Stream newStream = request.GetRequestStream ();
             newStream.Write (payloadBytes, 0, payloadBytes.Length);
-    /// End Body
+            /// End Body
 
             try
             {
