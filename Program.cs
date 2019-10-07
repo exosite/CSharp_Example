@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.IO;
 using System.Net;
 using System.Json;
@@ -11,8 +12,8 @@ namespace python_env
 
         public static void Main(string[] args)
         {
-            string productID = "x2aqhumhnqeqs0000";
-            string deviceID = "csharpdevice2";
+            string productID = GetProductID();
+            string deviceID = "csharpdevice3";
 
             string tokenFile = GetTokenFile();
             if (!File.Exists(tokenFile))
@@ -51,11 +52,19 @@ namespace python_env
             newStream.Write (payloadBytes, 0, payloadBytes.Length);
     /// End Body
 
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream resStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(resStream);
-            string MSG = reader.ReadLine();
-            writeToFile(GetTokenFile(),MSG);
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                Stream resStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(resStream);
+                string MSG = reader.ReadLine();
+                writeToFile(GetTokenFile(),MSG);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("{0} Exception caught.", e);
+            }
+
         }
 
         private static void writeToFile(string file, string body)
@@ -80,6 +89,17 @@ namespace python_env
         private static string GetToken()
         {
             return System.IO.File.ReadAllText(GetTokenFile());
+        }
+
+        private static string GetProductID()
+        {
+            string CurrentDirectory = Directory.GetCurrentDirectory();
+            string productIDFile = CurrentDirectory + Path.DirectorySeparatorChar + "product_id.txt";
+
+            string productId =  System.IO.File.ReadAllText(productIDFile);
+            // Remove Whitespaces and newlines that may accidentally be in the file
+            productId = Regex.Replace(productId, @"\s+", String.Empty);
+            return productId;
         }
 
         private static void WriteResource(string productID, string resource, string resource_value)
@@ -108,12 +128,19 @@ namespace python_env
             newStream.Write (payloadBytes, 0, payloadBytes.Length);
     /// End Body
 
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            Stream resStream = response.GetResponseStream();
-            StreamReader reader = new StreamReader(resStream);
-            string MSG = reader.ReadLine();
-            Console.WriteLine(response.StatusCode);
-            Console.WriteLine(MSG);
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+                Stream resStream = response.GetResponseStream();
+                StreamReader reader = new StreamReader(resStream);
+                string MSG = reader.ReadLine();
+                Console.WriteLine(response.StatusCode);
+                Console.WriteLine(MSG);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("{0} Exception caught.", e);
+            }
         }
     }
 }
